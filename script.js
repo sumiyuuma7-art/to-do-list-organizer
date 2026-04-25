@@ -95,6 +95,8 @@ const weeksElement = document.querySelector("#weeks");
 const input = document.querySelector("#taskInput");
 const addButton = document.querySelector("#addButton");
 const workbench = document.querySelector(".workbench");
+const sheetBar = document.querySelector(".sheet-bar");
+const barActions = document.querySelector(".bar-actions");
 const sidebarToggle = document.querySelector("#sidebarToggle");
 const preserveButton = document.querySelector("#preserveButton");
 const presetList = document.querySelector("#presetList");
@@ -119,8 +121,40 @@ const monthSelect = document.querySelector("#monthSelect");
 const reviewWeekSelect = document.querySelector("#reviewWeekSelect");
 const reviewPageWeeklyButton = document.querySelector("#reviewPageWeeklyButton");
 const reviewPageMonthlyButton = document.querySelector("#reviewPageMonthlyButton");
+const progressBox = document.querySelector(".progress-box");
+const dailyBox = document.querySelector(".daily-box");
+const mobileProgressHost = document.querySelector("#mobileProgressHost");
+const mobileActionsHost = document.querySelector("#mobileActionsHost");
 let selectedPresetId = "";
-let isSidebarOpen = localStorage.getItem("organize-labs-sidebar-open") !== "false";
+
+function getInitialSidebarState() {
+  const saved = localStorage.getItem("organize-labs-sidebar-open");
+  if (saved === "true") return true;
+  if (saved === "false") return false;
+  return window.innerWidth > 680;
+}
+
+let isSidebarOpen = getInitialSidebarState();
+
+function applyResponsiveLayout() {
+  const isMobileLayout = window.innerWidth <= 680;
+
+  if (isMobileLayout) {
+    if (mobileProgressHost && progressBox && mobileProgressHost.firstElementChild !== progressBox) {
+      mobileProgressHost.append(progressBox);
+    }
+    if (mobileActionsHost && barActions && mobileActionsHost.firstElementChild !== barActions) {
+      mobileActionsHost.append(barActions);
+    }
+  } else {
+    if (sheetBar && barActions && sheetBar.lastElementChild !== barActions) {
+      sheetBar.append(barActions);
+    }
+    if (dailyBox && progressBox && progressBox.nextElementSibling !== dailyBox) {
+      dailyBox.before(progressBox);
+    }
+  }
+}
 
 function loadState() {
   const saved = localStorage.getItem(STORAGE_KEY);
@@ -913,6 +947,8 @@ input.addEventListener("keydown", (event) => {
   if (event.key === "Enter") addTask();
 });
 
+window.addEventListener("resize", applyResponsiveLayout);
+
 resetButton.addEventListener("click", () => {
   const confirmed = window.confirm("現在のボードを初期状態に戻しますか？Preserveした保存版は残ります。");
   if (!confirmed) return;
@@ -926,5 +962,6 @@ document.querySelector("#currentDate").textContent = new Intl.DateTimeFormat("en
   year: "numeric",
 }).format(new Date());
 
+applyResponsiveLayout();
 renderSidebarState();
 render();
