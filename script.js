@@ -16,6 +16,10 @@ function getCurrentMonthKey() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
 
+function getCurrentYearKey() {
+  return String(new Date().getFullYear());
+}
+
 function getDateKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
@@ -77,6 +81,7 @@ const seedState = {
   boardTitle: "Future Builder",
   activeReview: "weekly",
   selectedMonth: getCurrentMonthKey(),
+  selectedYear: getCurrentYearKey(),
   selectedWeekId: "",
   tasks: ["Wake up early", "Deep work", "Workout", "Read", "Plan tomorrow"].map((text) => ({
     id: createId(),
@@ -107,6 +112,7 @@ const loadButton = document.querySelector("#loadButton");
 const resetButton = document.querySelector("#resetButton");
 const weeklyReviewButton = document.querySelector("#weeklyReviewButton");
 const monthlyReviewButton = document.querySelector("#monthlyReviewButton");
+const yearlyReviewButton = document.querySelector("#yearlyReviewButton");
 const dashboardView = document.querySelector("#dashboardView");
 const reviewPage = document.querySelector("#reviewPage");
 const backToDashboardButton = document.querySelector("#backToDashboardButton");
@@ -120,11 +126,14 @@ const reviewChart = document.querySelector("#reviewChart");
 const dashboardChart = document.querySelector("#dashboardChart");
 const taskProgressList = document.querySelector("#taskProgressList");
 const monthSelect = document.querySelector("#monthSelect");
+const yearSelect = document.querySelector("#yearSelect");
 const reviewWeekSelect = document.querySelector("#reviewWeekSelect");
 const reviewPageWeeklyButton = document.querySelector("#reviewPageWeeklyButton");
 const reviewPageMonthlyButton = document.querySelector("#reviewPageMonthlyButton");
+const reviewPageYearlyButton = document.querySelector("#reviewPageYearlyButton");
 const progressBox = document.querySelector(".progress-box");
 const dailyBox = document.querySelector(".daily-box");
+const reviewBox = document.querySelector(".review-box");
 const mobileProgressHost = document.querySelector("#mobileProgressHost");
 const mobileActionsHost = document.querySelector("#mobileActionsHost");
 const mobileSidebarHost = document.querySelector("#mobileSidebarHost");
@@ -149,6 +158,9 @@ function applyResponsiveLayout() {
     if (mobileActionsHost && barActions && mobileActionsHost.firstElementChild !== barActions) {
       mobileActionsHost.append(barActions);
     }
+    if (mobileActionsHost && dailyBox && mobileActionsHost.nextElementSibling !== dailyBox) {
+      mobileActionsHost.after(dailyBox);
+    }
     if (mobileSidebarHost && presetSidebar && mobileSidebarHost.firstElementChild !== presetSidebar) {
       mobileSidebarHost.append(presetSidebar);
     }
@@ -158,6 +170,9 @@ function applyResponsiveLayout() {
     }
     if (dailyBox && progressBox && progressBox.nextElementSibling !== dailyBox) {
       dailyBox.before(progressBox);
+    }
+    if (reviewBox && dailyBox && reviewBox.previousElementSibling !== dailyBox) {
+      reviewBox.before(dailyBox);
     }
     if (mainPanel && presetSidebar && presetSidebar.nextElementSibling !== mainPanel) {
       mainPanel.before(presetSidebar);
@@ -178,8 +193,9 @@ function loadState() {
 
 function normalizeState(source) {
   const nextState = source || cloneSeedState();
-  nextState.activeReview = nextState.activeReview === "monthly" ? "monthly" : "weekly";
+  nextState.activeReview = ["weekly", "monthly", "yearly"].includes(nextState.activeReview) ? nextState.activeReview : "weekly";
   nextState.selectedMonth = nextState.selectedMonth || getCurrentMonthKey();
+  nextState.selectedYear = nextState.selectedYear || getCurrentYearKey();
   nextState.selectedWeekId = nextState.selectedWeekId || "";
 
   if (Array.isArray(nextState.tasks)) {
@@ -386,8 +402,10 @@ function renderPresetOptions() {
 function renderReviewRate() {
   weeklyReviewButton.classList.toggle("is-active", state.activeReview === "weekly");
   monthlyReviewButton.classList.toggle("is-active", state.activeReview === "monthly");
+  yearlyReviewButton.classList.toggle("is-active", state.activeReview === "yearly");
   reviewPageWeeklyButton.classList.toggle("is-active", state.activeReview === "weekly");
   reviewPageMonthlyButton.classList.toggle("is-active", state.activeReview === "monthly");
+  reviewPageYearlyButton.classList.toggle("is-active", state.activeReview === "yearly");
 }
 
 function renderDashboardInsights() {
@@ -428,6 +446,9 @@ function setReviewMode(mode) {
   if (mode === "monthly" && !getMonthKeys().includes(state.selectedMonth)) {
     state.selectedMonth = getMonthKeys()[0] || getCurrentMonthKey();
   }
+  if (mode === "yearly" && !getYearKeys().includes(state.selectedYear)) {
+    state.selectedYear = getCurrentYearKey();
+  }
   saveState();
   renderReviewRate();
   showReviewPage();
@@ -438,12 +459,22 @@ function getMonthKeys() {
   return [...new Set(dateKeys.map((dateKey) => dateKey.slice(0, 7)))].sort();
 }
 
+function getYearKeys() {
+  const yearKeys = new Set(getKnownDateKeys().map((dateKey) => dateKey.slice(0, 4)));
+  yearKeys.add(getCurrentYearKey());
+  return [...yearKeys].sort((a, b) => b.localeCompare(a));
+}
+
 function formatMonthKey(monthKey) {
   const [year, month] = monthKey.split("-").map(Number);
   return new Intl.DateTimeFormat("en", {
     month: "long",
     year: "numeric",
   }).format(new Date(year, month - 1, 1));
+}
+
+function getYearMonthKeys(yearKey) {
+  return Array.from({ length: 12 }, (_, index) => `${yearKey}-${String(index + 1).padStart(2, "0")}`);
 }
 
 function getKnownDateKeys() {
@@ -494,6 +525,28 @@ function getMonthWeekStats(monthKey) {
     }))
     .filter((week) => week.dates.length)
     .map((week) => getWeekStats(week));
+}
+
+function getMonthStats(monthKey) {
+  const dates = getMonthDates(monthKey);
+  const [year, month] = monthKey.split("-").map(Number);
+  const date = new Date(year, month - 1, 1);
+  const done = dates.reduce((dateSum, item) => {
+    return dateSum + state.tasks.reduce((taskSum, task) => taskSum + Number(Boolean(state.dateChecks[task.id]?.[item.key])), 0);
+  }, 0);
+  const total = state.tasks.length * dates.length;
+
+  return {
+    title: date.toLocaleDateString("en", { month: "long" }),
+    chartLabel: date.toLocaleDateString("en", { month: "short" }),
+    done,
+    total,
+    rate: getRate(done, total),
+  };
+}
+
+function getYearMonthStats(yearKey) {
+  return getYearMonthKeys(yearKey).map((monthKey) => getMonthStats(monthKey));
 }
 
 function getWeekStats(week) {
@@ -572,36 +625,57 @@ function renderReviewPage() {
     monthSelect.append(option);
   });
 
+  const yearKeys = getYearKeys();
+  yearSelect.innerHTML = "";
+  yearKeys.forEach((yearKey) => {
+    const option = document.createElement("option");
+    option.value = yearKey;
+    option.textContent = yearKey;
+    yearSelect.append(option);
+  });
+
   const isMonthly = state.activeReview === "monthly";
+  const isYearly = state.activeReview === "yearly";
   monthSelect.hidden = !isMonthly;
-  reviewWeekSelect.hidden = isMonthly;
+  yearSelect.hidden = !isYearly;
+  reviewWeekSelect.hidden = isMonthly || isYearly;
+  reviewDetailGrid.classList.toggle("is-yearly", isYearly);
 
   if (isMonthly && !monthKeys.includes(state.selectedMonth)) {
     state.selectedMonth = monthKeys[0] || getCurrentMonthKey();
   }
   monthSelect.value = state.selectedMonth;
 
+  if (isYearly && !yearKeys.includes(state.selectedYear)) {
+    state.selectedYear = getCurrentYearKey();
+  }
+  yearSelect.value = state.selectedYear;
+
   if (!weekRanges.some((week) => week.id === state.selectedWeekId)) {
     state.selectedWeekId = weekRanges.find((week) => week.dates.some((date) => date.key === getTodayKey()))?.id || weekRanges[weekRanges.length - 1]?.id || "";
   }
   reviewWeekSelect.value = state.selectedWeekId;
 
-  const weekStats = isMonthly ? getMonthWeekStats(state.selectedMonth) : weekRanges.map((week) => getWeekStats(week));
+  const periodStats = isYearly
+    ? getYearMonthStats(state.selectedYear)
+    : isMonthly
+      ? getMonthWeekStats(state.selectedMonth)
+      : weekRanges.map((week) => getWeekStats(week));
   const selectedWeek = weekRanges.find((week) => week.id === state.selectedWeekId) || weekRanges[weekRanges.length - 1];
   const selectedWeekStats = selectedWeek ? getWeekStats(selectedWeek) : { title: "Week", rate: 0, done: 0, total: 0 };
-  const totalDone = weekStats.reduce((sum, week) => sum + week.done, 0);
-  const totalChecks = weekStats.reduce((sum, week) => sum + week.total, 0);
+  const totalDone = periodStats.reduce((sum, item) => sum + item.done, 0);
+  const totalChecks = periodStats.reduce((sum, item) => sum + item.total, 0);
   const totalRate = getRate(totalDone, totalChecks);
 
-  reviewPageTitle.textContent = isMonthly ? "Monthly Review" : "Weekly Review";
-  reviewPageLabel.textContent = isMonthly ? formatMonthKey(state.selectedMonth) : selectedWeekStats.title;
-  reviewPageScore.textContent = `${isMonthly ? totalRate : selectedWeekStats.rate}%`;
-  reviewPageMeta.textContent = isMonthly
+  reviewPageTitle.textContent = isYearly ? "Yearly Review" : isMonthly ? "Monthly Review" : "Weekly Review";
+  reviewPageLabel.textContent = isYearly ? state.selectedYear : isMonthly ? formatMonthKey(state.selectedMonth) : selectedWeekStats.title;
+  reviewPageScore.textContent = `${isYearly || isMonthly ? totalRate : selectedWeekStats.rate}%`;
+  reviewPageMeta.textContent = isYearly || isMonthly
     ? `${totalDone} / ${totalChecks} checks completed`
     : `${selectedWeekStats.done} / ${selectedWeekStats.total} checks completed`;
 
-  const detailStats = isMonthly ? weekStats : getDayStats(selectedWeek);
-  reviewChartTitle.textContent = isMonthly ? "Week progress curve" : "Day progress curve";
+  const detailStats = isYearly ? periodStats : isMonthly ? periodStats : getDayStats(selectedWeek);
+  reviewChartTitle.textContent = isYearly ? "Month progress curve" : isMonthly ? "Week progress curve" : "Day progress curve";
   renderReviewChart(detailStats);
 
   reviewDetailGrid.innerHTML = "";
@@ -939,11 +1013,18 @@ preserveButton.addEventListener("click", preserveCurrentBoard);
 loadButton.addEventListener("click", loadSelectedPreset);
 weeklyReviewButton.addEventListener("click", () => setReviewMode("weekly"));
 monthlyReviewButton.addEventListener("click", () => setReviewMode("monthly"));
+yearlyReviewButton.addEventListener("click", () => setReviewMode("yearly"));
 reviewPageWeeklyButton.addEventListener("click", () => setReviewMode("weekly"));
 reviewPageMonthlyButton.addEventListener("click", () => setReviewMode("monthly"));
+reviewPageYearlyButton.addEventListener("click", () => setReviewMode("yearly"));
 backToDashboardButton.addEventListener("click", showDashboard);
 monthSelect.addEventListener("change", () => {
   state.selectedMonth = monthSelect.value;
+  saveState();
+  renderReviewPage();
+});
+yearSelect.addEventListener("change", () => {
+  state.selectedYear = yearSelect.value;
   saveState();
   renderReviewPage();
 });

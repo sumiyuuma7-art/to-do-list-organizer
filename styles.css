@@ -690,7 +690,7 @@ select {
 
 .review-tabs {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   margin-bottom: 10px;
 }
@@ -746,7 +746,8 @@ select {
 }
 
 .month-select,
-.week-select {
+.week-select,
+.year-select {
   min-height: 34px;
   border: 1px solid #c8ccd5;
   background: white;
@@ -759,7 +760,8 @@ select {
 }
 
 .month-select[hidden],
-.week-select[hidden] {
+.week-select[hidden],
+.year-select[hidden] {
   display: none;
 }
 
@@ -890,6 +892,10 @@ select {
   gap: 12px;
 }
 
+.review-detail-grid.is-yearly {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
 .review-detail-card {
   border: 1px solid var(--line);
   padding: 14px;
@@ -987,17 +993,22 @@ select {
     width: 100%;
     margin-left: 0;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .week-select,
-  .month-select {
+  .month-select,
+  .year-select {
     flex: 1 1 240px;
     min-width: 0;
   }
 
   .review-detail-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .review-detail-grid.is-yearly {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1106,6 +1117,10 @@ select {
 
   .side-panel {
     grid-template-columns: 1fr;
+  }
+
+  .daily-box {
+    display: none;
   }
 
   .dashboard-grid {
@@ -1217,7 +1232,8 @@ select {
   .review-page-tabs button,
   .back-button,
   .month-select,
-  .week-select {
+  .week-select,
+  .year-select {
     min-height: 38px;
   }
 
@@ -1226,7 +1242,8 @@ select {
   }
 
   .week-select,
-  .month-select {
+  .month-select,
+  .year-select {
     width: 100%;
   }
 
@@ -1256,6 +1273,10 @@ select {
   .review-detail-grid {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
+  }
+
+  .review-detail-grid.is-yearly {
+    grid-template-columns: 1fr 1fr;
   }
 
   .review-detail-card {
@@ -1303,6 +1324,10 @@ select {
   }
 
   .review-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .review-detail-grid.is-yearly {
     grid-template-columns: 1fr;
   }
 }
