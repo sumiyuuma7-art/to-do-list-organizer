@@ -331,7 +331,8 @@ select {
 }
 
 .mobile-progress-host,
-.mobile-actions-box {
+.mobile-actions-box,
+.mobile-sidebar-host {
   display: none;
 }
 
@@ -1079,6 +1080,10 @@ select {
     background: white;
   }
 
+  .mobile-sidebar-host:not(:empty) {
+    display: block;
+  }
+
   .mobile-progress-host .progress-box,
   .mobile-actions-box .bar-actions {
     width: 100%;
@@ -1091,6 +1096,12 @@ select {
 
   .mobile-actions-box .bar-actions {
     gap: 8px;
+  }
+
+  .mobile-sidebar-host .preset-sidebar {
+    margin-top: 10px;
+    border: 1px solid var(--line);
+    background: #f3f4f7;
   }
 
   .side-panel {

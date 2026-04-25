@@ -95,6 +95,8 @@ const weeksElement = document.querySelector("#weeks");
 const input = document.querySelector("#taskInput");
 const addButton = document.querySelector("#addButton");
 const workbench = document.querySelector(".workbench");
+const presetSidebar = document.querySelector(".preset-sidebar");
+const mainPanel = document.querySelector(".main-panel");
 const sheetBar = document.querySelector(".sheet-bar");
 const barActions = document.querySelector(".bar-actions");
 const sidebarToggle = document.querySelector("#sidebarToggle");
@@ -125,6 +127,7 @@ const progressBox = document.querySelector(".progress-box");
 const dailyBox = document.querySelector(".daily-box");
 const mobileProgressHost = document.querySelector("#mobileProgressHost");
 const mobileActionsHost = document.querySelector("#mobileActionsHost");
+const mobileSidebarHost = document.querySelector("#mobileSidebarHost");
 let selectedPresetId = "";
 
 function getInitialSidebarState() {
@@ -146,12 +149,18 @@ function applyResponsiveLayout() {
     if (mobileActionsHost && barActions && mobileActionsHost.firstElementChild !== barActions) {
       mobileActionsHost.append(barActions);
     }
+    if (mobileSidebarHost && presetSidebar && mobileSidebarHost.firstElementChild !== presetSidebar) {
+      mobileSidebarHost.append(presetSidebar);
+    }
   } else {
     if (sheetBar && barActions && sheetBar.lastElementChild !== barActions) {
       sheetBar.append(barActions);
     }
     if (dailyBox && progressBox && progressBox.nextElementSibling !== dailyBox) {
       dailyBox.before(progressBox);
+    }
+    if (mainPanel && presetSidebar && presetSidebar.nextElementSibling !== mainPanel) {
+      mainPanel.before(presetSidebar);
     }
   }
 }
