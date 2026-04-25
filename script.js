@@ -120,7 +120,15 @@ const reviewWeekSelect = document.querySelector("#reviewWeekSelect");
 const reviewPageWeeklyButton = document.querySelector("#reviewPageWeeklyButton");
 const reviewPageMonthlyButton = document.querySelector("#reviewPageMonthlyButton");
 let selectedPresetId = "";
-let isSidebarOpen = localStorage.getItem("organize-labs-sidebar-open") !== "false";
+
+function getInitialSidebarState() {
+  const saved = localStorage.getItem("organize-labs-sidebar-open");
+  if (saved === "true") return true;
+  if (saved === "false") return false;
+  return window.innerWidth > 680;
+}
+
+let isSidebarOpen = getInitialSidebarState();
 
 function loadState() {
   const saved = localStorage.getItem(STORAGE_KEY);
