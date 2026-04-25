@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Organize Labs Todo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="caption-strip" aria-label="Intro caption">
+        <p contenteditable="true" spellcheck="false" id="heroText">POV: Everyone's sleeping, you're building your future</p>
+        <div class="brand-mark">
+          <span class="camera-icon" aria-hidden="true"></span>
+          <span contenteditable="true" spellcheck="false" id="brandText">@ORGANIZE.LABS</span>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="Todo dashboard">
+        <header class="sheet-bar">
+          <div>
+            <span class="doc-dot"></span>
+            <strong contenteditable="true" spellcheck="false" id="boardTitle">Future Builder</strong>
+            <span class="muted">Daily system</span>
+          </div>
+          <div class="bar-actions">
+            <button class="save-pill" id="sidebarToggle" type="button">Hide Tab</button>
+            <button class="save-pill" id="preserveButton" type="button">Preserve</button>
+            <button class="save-pill" id="resetButton" type="button">Reset</button>
+          </div>
+        </header>
+
+        <div class="workbench">
+          <aside class="preset-sidebar" aria-label="Saved presets">
+            <div class="preset-heading">
+              <span>Preserved</span>
+              <span id="presetCount">0</span>
+            </div>
+            <div class="preset-list" id="presetList"></div>
+            <button class="load-sidebar-button" id="loadButton" type="button">Load</button>
+          </aside>
+
+          <div class="main-panel">
+            <div class="dashboard-view" id="dashboardView">
+              <section class="quick-add" aria-label="Add a new task">
+                <input id="taskInput" type="text" placeholder="自分の項目を追加..." maxlength="42" />
+                <button id="addButton" type="button">Add</button>
+              </section>
+
+              <div class="dashboard-grid">
+                <section class="habit-board" aria-label="Weekly habit checklist">
+                  <div class="sheet-heading">
+                    <span>Habit tracker</span>
+                    <span id="currentDate"></span>
+                  </div>
+                  <div class="weeks" id="weeks"></div>
+                </section>
+
+                <aside class="side-panel" aria-label="Progress summary">
+                  <section class="progress-box">
+                    <h2>Progress</h2>
+                    <div class="ring" id="progressRing" style="--progress: 0">
+                      <span id="progressText">0%</span>
+                    </div>
+                    <dl class="stats">
+                      <div>
+                        <dt>Done</dt>
+                        <dd id="doneCount">0</dd>
+                      </div>
+                      <div>
+                        <dt>Total</dt>
+                        <dd id="totalCount">0</dd>
+                      </div>
+                    </dl>
+                  </section>
+
+                  <section class="daily-box">
+                    <h2>Top 3 Daily Habits</h2>
+                    <ol id="topHabits"></ol>
+                  </section>
+
+                  <section class="review-box">
+                    <div class="review-head">
+                      <h2>Review</h2>
+                      <div class="review-tabs" aria-label="Review type">
+                        <button class="is-active" id="weeklyReviewButton" type="button">Weekly</button>
+                        <button id="monthlyReviewButton" type="button">Monthly</button>
+                      </div>
+                    </div>
+                  </section>
+                </aside>
+              </div>
+
+              <section class="dashboard-insights" aria-label="Dashboard insights">
+                <section class="insight-panel">
+                  <div class="insight-heading">
+                    <h2>Achievement Graph</h2>
+                    <span>Week by week</span>
+                  </div>
+                  <svg id="dashboardChart" viewBox="0 0 640 220" role="img" aria-label="Achievement graph"></svg>
+                </section>
+
+                <section class="insight-panel">
+                  <div class="insight-heading">
+                    <h2>Task Progress</h2>
+                    <span>This month</span>
+                  </div>
+                  <div class="task-progress-list" id="taskProgressList"></div>
+                </section>
+              </section>
+            </div>
+
+            <section class="review-page" id="reviewPage" hidden>
+              <header class="review-page-head">
+                <button class="back-button" id="backToDashboardButton" type="button">Back</button>
+                <div>
+                  <span>Performance Review</span>
+                  <h1 id="reviewPageTitle">Weekly Review</h1>
+                </div>
+                <div class="review-page-tabs" aria-label="Review page type">
+                  <button class="is-active" id="reviewPageWeeklyButton" type="button">Weekly</button>
+                  <button id="reviewPageMonthlyButton" type="button">Monthly</button>
+                </div>
+                <select class="week-select" id="reviewWeekSelect" aria-label="Review week"></select>
+                <select class="month-select" id="monthSelect" aria-label="Review month"></select>
+              </header>
+
+              <div class="review-hero">
+                <div>
+                  <span id="reviewPageLabel">Latest week</span>
+                  <strong id="reviewPageScore">0%</strong>
+                  <p id="reviewPageMeta">0 / 0 checks</p>
+                </div>
+              </div>
+
+              <section class="review-chart" aria-label="Performance chart">
+                <div class="review-chart-head">
+                  <h2 id="reviewChartTitle">Progress curve</h2>
+                  <span>0% - 100%</span>
+                </div>
+                <svg id="reviewChart" viewBox="0 0 640 220" role="img" aria-label="Review progress graph"></svg>
+              </section>
+
+              <div class="review-detail-grid" id="reviewDetailGrid"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
